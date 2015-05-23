@@ -1,2 +1,2 @@
 # wschat
-Simple websocket chat
+Simple websocket chat, using github.com/arvinkulagin/websub
