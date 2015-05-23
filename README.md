@@ -1,0 +1,2 @@
+# wschat
+Simple websocket chat
