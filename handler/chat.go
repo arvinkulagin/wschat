@@ -24,18 +24,21 @@ func (c Chat) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	messanger := c.Broker.Subscribe(tag, conn)
-
 	log.Printf("Connect: %s\n", conn.RemoteAddr().String())
+
+	message := c.Broker.Subscribe(tag, conn)
 
 	for {
 		_, msg, err := conn.ReadMessage()
 		if err != nil {
-			messanger.Unsubscribe(conn)
 			conn.Close()
 			log.Printf("Disconnect: %s\n", conn.RemoteAddr().String())
-			return
+			break
 		}
-		messanger.Publish(msg)
+		message <- msg
+	}
+	err = c.Broker.Unsubscribe(tag, conn)
+	if err != nil {
+		log.Println(err)
 	}
 }

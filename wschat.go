@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	addr := flag.String("addr", "127.0.0.1:8888", "Address")
+	addr := flag.String("Address", "localhost:8888", "Address")
 	flag.Parse()
 
 	broker := websub.NewBroker()
