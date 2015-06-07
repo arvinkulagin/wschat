@@ -6,9 +6,13 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"flag"
 )
 
 func main() {
+	addr := flag.String("addr", "localhost:8888", "Network address")
+	flag.Parse()
+
 	broker := NewBroker()
 	indexTemplate, err := template.ParseFiles("wschat.html")
 	if err != nil {
@@ -39,8 +43,8 @@ func main() {
 			broker.Publish(msg)
 		}
 	})
-	log.Println("Listen on localhost:8888")
-	log.Fatal(http.ListenAndServe("localhost:8888", nil))
+	log.Printf("Listen on %s\n", *addr)
+	log.Fatal(http.ListenAndServe(*addr, nil))
 }
 
 type Broker struct {
