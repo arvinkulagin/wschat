@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<title>wschat</title>
+<style type="text/css">
+	body {
+		text-align: center;
+		padding: 35px;
+	}
+	/*p {
+		padding: 2px;
+	}*/
+	.chatbox {
+		text-align: left;
+		margin: 0 auto;
+		margin-bottom: 1vh;
+		padding: 1vw;
+		height: 70vh;
+		width: 60vw;
+		border: 1px solid #ACD8F0;
+		border-radius: 5px;
+		overflow-y: scroll;
+	}
+	p {
+		margin-top: 0em;
+		margin-bottom: 0.5em;
+	}
+	input {
+		width: 60vw;
+		font-size: 13px;
+		padding: 0.5em 1vw 0.5em 1vw;
+		border: 1px solid #ACD8F0;
+		border-radius: 5px;
+	}
+	input:focus {
+		outline: 0;
+	}
+</style>
+</head>
+<body>
+    <div id="subscribe" class="chatbox"></div>
+    <form name="publish">
+    <input type="text" name="message" placeholder="Say something" autocomplete="off" maxlength="500">
+    </form>
+</body>
+<script type="text/javascript">
+var chatBox = document.getElementById('subscribe');
+chatBox.scrollTop = chatBox.scrollHeight;
+
+var socket = new WebSocket("ws://localhost:8888/chat");
+
+document.forms.publish.onsubmit = function() {
+	var outgoingMessage = this.message.value;
+	if (outgoingMessage == "") {
+		return false;
+	};
+	socket.send(outgoingMessage);
+	this.message.value = ""
+	return false;
+};
+
+socket.onmessage = function(event) {
+	var incomingMessage = event.data;
+	showMessage(incomingMessage);
+};
+
+function showMessage(message) {
+	var messageElem = document.createElement('p');
+	messageElem.appendChild(document.createTextNode("Anoninus: " + message));
+	var chatBox = document.getElementById('subscribe');
+	chatBox.appendChild(messageElem);
+	chatBox.scrollIntoView(true);
+	chatBox.scrollTop = chatBox.scrollHeight;
+}
+</script>
+</html>
