@@ -15,7 +15,7 @@ func main() {
 	addr := flag.String("addr", "localhost:8888", "Network address")
 	flag.Parse()
 
-	broker := NewBroker()
+	broker := NewBroker(5)
 	indexTemplate, err := template.ParseFiles("wschat.html")
 	if err != nil {
 		log.Fatal(err)
@@ -61,7 +61,7 @@ type Broker struct {
 	buffer      chan chan []string
 }
 
-func NewBroker() *Broker {
+func NewBroker(size int) *Broker {
 	b := Broker{
 		subscribe:   make(chan *websocket.Conn),
 		unsubscribe: make(chan *websocket.Conn),
@@ -85,7 +85,11 @@ func NewBroker() *Broker {
 			case msg := <-b.publish:
 				for _, conn := range conns {
 					conn.WriteMessage(websocket.TextMessage, msg)
-					messages = append(messages, string(msg))
+					if len(messages) < size {
+						messages = append(messages, string(msg))
+					} else {
+						messages = append(messages[1:], string(msg))
+					}
 				}
 			case ch := <-b.buffer:
 				ch <- messages
