@@ -7,9 +7,6 @@
 		text-align: center;
 		padding: 35px;
 	}
-	/*p {
-		padding: 2px;
-	}*/
 	.chatbox {
 		text-align: left;
 		margin: 0 auto;
@@ -38,16 +35,31 @@
 </style>
 </head>
 <body>
-    <div id="subscribe" class="chatbox"></div>
+    <div id="subscribe" class="chatbox">
+		{{ range $value := . }}
+			<p>{{ $value }}</p>
+		{{ end }}
+    </div>
     <form name="publish">
     <input type="text" name="message" placeholder="Say something" autocomplete="off" maxlength="500">
     </form>
 </body>
 <script type="text/javascript">
-var chatBox = document.getElementById('subscribe');
-chatBox.scrollTop = chatBox.scrollHeight;
+scroll('subscribe')
 
 var socket = new WebSocket("ws://localhost:8888/chat");
+
+socket.onmessage = function(event) {
+	var incomingMessage = event.data;
+	showMessage(incomingMessage);
+};
+
+function showMessage(message) {
+	var messageElem = document.createElement('p');
+	messageElem.appendChild(document.createTextNode(message));
+	document.getElementById('subscribe').appendChild(messageElem);
+	scroll('subscribe')
+}
 
 document.forms.publish.onsubmit = function() {
 	var outgoingMessage = this.message.value;
@@ -59,18 +71,9 @@ document.forms.publish.onsubmit = function() {
 	return false;
 };
 
-socket.onmessage = function(event) {
-	var incomingMessage = event.data;
-	showMessage(incomingMessage);
-};
-
-function showMessage(message) {
-	var messageElem = document.createElement('p');
-	messageElem.appendChild(document.createTextNode("Anoninus: " + message));
-	var chatBox = document.getElementById('subscribe');
-	chatBox.appendChild(messageElem);
-	chatBox.scrollIntoView(true);
-	chatBox.scrollTop = chatBox.scrollHeight;
+function scroll (id) {
+	element = document.getElementById(id);
+	element.scrollTop = element.scrollHeight;
 }
 </script>
 </html>

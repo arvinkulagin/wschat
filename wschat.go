@@ -5,8 +5,10 @@ import (
 	"github.com/gorilla/websocket"
 	"html/template"
 	"log"
+	"fmt"
 	"net/http"
 	"flag"
+	"time"
 )
 
 func main() {
@@ -18,8 +20,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		indexTemplate.Execute(w, nil)
+		Messages := broker.Buffer()
+		indexTemplate.Execute(w, Messages)
 	})
 	http.HandleFunc("/chat", func(w http.ResponseWriter, r *http.Request) {
 		upgrader := websocket.Upgrader{
@@ -40,7 +44,10 @@ func main() {
 				log.Printf("Disconnect: %s\n", conn.RemoteAddr().String())
 				return
 			}
-			broker.Publish(msg)
+			h, m, s := time.Now().Clock()
+			session := []byte(fmt.Sprintf("%d:%d:%d: ", h, m, s))
+			out := append(session, msg...)
+			broker.Publish(out)
 		}
 	})
 	log.Printf("Listen on %s\n", *addr)
@@ -51,6 +58,7 @@ type Broker struct {
 	subscribe   chan *websocket.Conn
 	unsubscribe chan *websocket.Conn
 	publish     chan []byte
+	buffer      chan chan []string
 }
 
 func NewBroker() *Broker {
@@ -58,10 +66,11 @@ func NewBroker() *Broker {
 		subscribe:   make(chan *websocket.Conn),
 		unsubscribe: make(chan *websocket.Conn),
 		publish:     make(chan []byte),
+		buffer:      make(chan chan []string),
 	}
 	go func() {
 		conns := []*websocket.Conn{}
-		messages := [][]byte{}
+		messages := []string{}
 		for {
 			select {
 			case conn := <-b.subscribe:
@@ -74,10 +83,12 @@ func NewBroker() *Broker {
 					}
 				}
 			case msg := <-b.publish:
-				messages = append(messages)
 				for _, conn := range conns {
 					conn.WriteMessage(websocket.TextMessage, msg)
+					messages = append(messages, string(msg))
 				}
+			case ch := <-b.buffer:
+				ch <- messages
 			}
 		}
 	}()
@@ -95,3 +106,21 @@ func (b *Broker) Unsubscribe(conn *websocket.Conn) {
 func (b *Broker) Publish(msg []byte) {
 	b.publish <- msg
 }
+
+func (b *Broker) Buffer() []string {
+	ch := make(chan []string)
+	b.buffer <- ch
+	m := <-ch
+	return m
+}
+
+
+
+
+
+
+
+
+
+
+
