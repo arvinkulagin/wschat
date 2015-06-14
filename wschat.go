@@ -12,9 +12,10 @@ import (
 
 func main() {
 	addr := flag.String("addr", "localhost:8888", "Network address")
+	size := flag.Int("buf", 20, "Message buffer size")
 	flag.Parse()
 
-	broker := NewBroker(5)
+	broker := NewBroker(*size)
 	indexTemplate, err := template.ParseFiles("wschat.html")
 	if err != nil {
 		log.Fatal(err)
