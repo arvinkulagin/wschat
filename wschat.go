@@ -44,8 +44,7 @@ func main() {
 				log.Printf("Disconnect: %s\n", conn.RemoteAddr().String())
 				return
 			}
-			h, m, s := time.Now().Clock()
-			session := []byte(fmt.Sprintf("%d:%d:%d: ", h, m, s))
+			session := []byte(fmt.Sprintf("%s: ", time.Now().Format("15:04:05")))
 			out := append(session, msg...)
 			broker.Publish(out)
 		}
