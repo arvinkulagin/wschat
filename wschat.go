@@ -1,13 +1,12 @@
-// Yet another websocket chat service.
 package main
 
 import (
+	"flag"
+	"fmt"
 	"github.com/gorilla/websocket"
 	"html/template"
 	"log"
-	"fmt"
 	"net/http"
-	"flag"
 	"time"
 )
 
@@ -117,14 +116,3 @@ func (b *Broker) Buffer() []string {
 	m := <-ch
 	return m
 }
-
-
-
-
-
-
-
-
-
-
-
