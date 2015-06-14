@@ -47,7 +47,8 @@
 <script type="text/javascript">
 scroll('subscribe')
 
-var socket = new WebSocket("ws://localhost:8888/chat");
+var addr = window.location.host
+var socket = new WebSocket("ws://" + addr + "/chat");
 
 socket.onmessage = function(event) {
 	var incomingMessage = event.data;
