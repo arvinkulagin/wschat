@@ -83,13 +83,13 @@ func NewBroker(size int) *Broker {
 					}
 				}
 			case msg := <-b.publish:
+				if len(messages) < size {
+					messages = append(messages, string(msg))
+				} else {
+					messages = append(messages[1:], string(msg))
+				}
 				for _, conn := range conns {
 					conn.WriteMessage(websocket.TextMessage, msg)
-					if len(messages) < size {
-						messages = append(messages, string(msg))
-					} else {
-						messages = append(messages[1:], string(msg))
-					}
 				}
 			case ch := <-b.buffer:
 				ch <- messages
