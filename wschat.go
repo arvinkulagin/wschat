@@ -10,13 +10,15 @@ import (
 	"time"
 )
 
+const templatePath string = "wschat.html"
+
 func main() {
-	addr := flag.String("addr", "localhost:8888", "Network address")
-	size := flag.Int("buf", 20, "Message buffer size")
+	addr := flag.String("addr", ":8888", "Network address")
+	size := flag.Int("buf", 50, "Message buffer size")
 	flag.Parse()
 
 	broker := NewBroker(*size)
-	indexTemplate, err := template.ParseFiles("wschat.html")
+	indexTemplate, err := template.ParseFiles(templatePath)
 	if err != nil {
 		log.Fatal(err)
 	}
